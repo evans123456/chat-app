@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>chat room</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="" />
+  </head>
+  <body>
+    <textarea id="chat-log" cols="100" rows="20"></textarea><br />
+    <input type="text" id="chat-message-input" size="100" /><br />
+    <input type="button" id="chat-message-submit" value="send" />
+
+    <script>
+      // connects to web socket and opens up
+      var chatSocket = new WebSocket(
+        "ws://" + window.location.host + "/ws/chat/"
+      );
+
+      // when a message is received
+      chatSocket.onmessage = function (e) {
+        console.log("e.data: ", e.data);
+        var data = JSON.parse(e.data);
+        var message = data["message"];
+
+        // to manipulate the html
+        document.querySelector("#chat-log").value += message + "\n";
+      };
+
+      chatSocket.onclose = function (e) {
+        console.error("chat socket closed");
+      };
+
+      document.querySelector("#chat-message-submit").onclick = function (e) {
+        var messageInputDom = document.querySelector("#chat-message-input");
+        var message = messageInputDom.value;
+        chatSocket.send(
+          JSON.stringify({
+            message: message,
+          })
+        );
+
+        // empties the chat box
+        messageInputDom.value = "";
+      };
+    </script>
+  </body>
+</html>
